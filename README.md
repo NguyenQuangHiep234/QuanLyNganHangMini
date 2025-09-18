@@ -61,42 +61,42 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 ## 📷 3. Một số hình ảnh
 <p align="center">
 <p align="center">
-  <img src="docs/DangNhap.jpg" alt="1" width="800"/><br/>
+  <img src="docs/DangNhap.png" alt="1" width="800"/><br/>
   <i>Hình 1: Giao diện "Đăng nhập"</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/DangKy.jpg" alt="2" width="800"/><br/>
+  <img src="docs/DangKy.png" alt="2" width="800"/><br/>
   <i>Hình 2: Giao diện "Đăng ký"</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Admin.jpg" alt="3" width="800"/><br/>
+  <img src="docs/Admin.png" alt="3" width="800"/><br/>
   <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Main.jpg" alt="4" width="800"/><br/>
+  <img src="docs/Main.png" alt="4" width="800"/><br/>
   <i>Hình 4: Giao diện chính</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Menu.jpg" alt="4" width="800"/><br/>
+  <img src="docs/Menu.png" alt="4" width="800"/><br/>
   <i>Hình 5: Giao diện Menu</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Transfer.jpg" alt="4" width="800"/><br/>
+  <img src="docs/Transfer.png" alt="4" width="800"/><br/>
   <i>Hình 6: Giao diện "Chuyển khoản"</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/History.jpg" alt="4" width="800"/><br/>
+  <img src="docs/History.png" alt="4" width="800"/><br/>
   <i>Hình 7: Giao diện "Lịch sử giao dịch"</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Lock.jpg" alt="4" width="800"/><br/>
+  <img src="docs/Lock.png" alt="4" width="800"/><br/>
   <i>Hình 8: Tài khoản bị khóa</i>
 </p>
 </p>
