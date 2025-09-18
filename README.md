@@ -66,12 +66,12 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 </p>
 <br/>
 <p align="center">
-  <img src="docs/DangKy.png" alt="2" width="800"/><br/>
+  <img src="docs/Login.png" alt="2" width="800"/><br/>
   <i>Hình 2: Giao diện "Đăng ký"</i>
 </p>
 <br/>
 <p align="center">
-  <img src="docs/Admin.png" alt="3" width="800"/><br/>
+  <img src="docs/Register.png" alt="3" width="800"/><br/>
   <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
 </p>
 <br/>
