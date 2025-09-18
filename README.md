@@ -4,7 +4,7 @@
     </a>
 </h2>
 <h2 align="center">
-    HỆ THỐNG QUẢN LÝ NGÂN HÀNG MINI - RMI
+    HỆ THỐNG QUẢN LÝ NGÂN HÀNG MINI
 </h2>
 
 <div align="center">
