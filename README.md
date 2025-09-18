@@ -83,6 +83,8 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
         <img src="docs/Admin.png" alt="3" width="400"/><br/>
         <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
       </td>
+    </tr>
+    <tr>
       <td align="center" width="50%">
         <img src="docs/Main.png" alt="4" width="400"/><br/>
         <i>Hình 4: Giao diện chính</i>
