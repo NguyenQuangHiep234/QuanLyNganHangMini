@@ -77,16 +77,17 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
         <i>Hình 2: Giao diện "Đăng ký"</i>
       </td>
     </tr>
-    <tr>
-      <td align="center" width="50%">
-        <img src="docs/Admin.png" alt="3" width="400"/><br/>
-        <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
-      </td>
-      <td align="center" width="50%">
-        <img src="docs/Main.png" alt="4" width="400"/><br/>
-        <i>Hình 4: Giao diện chính</i>
-      </td>
-    </tr>
+        <br/>
+    <p align="center">
+      <img src="docs/Admin.png" alt="3" width="500"/><br/>
+      <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
+    </p>
+        <br/>
+    <p align="center">
+      <img src="docs/Main.png" alt="4" width="500"/><br/>
+      <i>Hình 4: Giao diện chính</i>
+    </p>
+        <br/>
     <tr>
       <td align="center" width="50%">
         <img src="docs/Menu.png" alt="5" width="400"/><br/>
@@ -97,6 +98,7 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
         <i>Hình 6: Giao diện "Chuyển khoản"</i>
       </td>
     </tr>
+          <br/>
     <tr>
       <td align="center" width="50%">
         <img src="docs/History.png" alt="7" width="400"/><br/>
