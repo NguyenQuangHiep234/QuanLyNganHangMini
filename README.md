@@ -124,6 +124,7 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 - Cài đặt **Java JDK 8+** → [Tải tại đây](https://www.oracle.com/java/technologies/javase-downloads.html)
 - Cài đặt **MySQL Server** → [Tải tại đây](https://dev.mysql.com/downloads/mysql/)
 - Cài đặt **Eclipse IDE** → [Tải tại đây](https://www.eclipse.org/downloads/)
+- Tải **MySQL Connector/J** → [Tải tại đây](https://dev.mysql.com/downloads/connector/j/)
 - Hệ điều hành: **Windows 10/11**.
 
 ### 2️⃣ Tải source code
@@ -138,7 +139,14 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 - Chọn thư mục dự án vừa tải về.
 - Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.
 
-### 4️⃣ Cấu hình cơ sở dữ liệu
+###4️⃣ Thêm MySQL Connector/J vào Build Path
+- Giải nén file ZIP của MySQL Connector tải ở trên
+- Trong Eclipse, chuột phải project → Build Path → Configure Build Path
+- Tab Libraries → Add External JARs
+- Chọn file mysql-connector-java-*.*.*.jar từ folder vừa giải nén
+- Click Apply and Close
+
+### 5️⃣ Cấu hình cơ sở dữ liệu
 
 - Tạo database **bank_management** trong MySQL:
 
@@ -180,8 +188,6 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
 
 - Cập nhật thông tin kết nối trong `DatabaseConnection.java`:  
   username|password|host|database_name
-
-> 📌 Lưu ý: File này được server đọc & ghi trực tiếp. Khi chuyển tiền, dữ liệu sẽ tự động cập nhật.
 
 ### 5️⃣ Chạy chương trình
 
