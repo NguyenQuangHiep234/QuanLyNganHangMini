@@ -139,7 +139,7 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 - Chọn thư mục dự án vừa tải về.
 - Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.
 
-###4️⃣ Thêm MySQL Connector/J vào Build Path
+### 4️⃣ Thêm MySQL Connector/J vào Build Path
 - Giải nén file ZIP của MySQL Connector tải ở trên
 - Trong Eclipse, chuột phải project → Build Path → Configure Build Path
 - Tab Libraries → Add External JARs
