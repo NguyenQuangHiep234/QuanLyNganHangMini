@@ -23,26 +23,31 @@
 ---
 
 ## 📖 1. Giới thiệu hệ thống
+
 Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình **client-server** sử dụng **Java RMI** nhằm:
+
 - Hỗ trợ khách hàng đăng nhập, tạo tài khoản, kiểm tra số dư, chuyển tiền và xem lịch sử giao dịch.
 - Cho phép quản trị viên (Admin) quản lý tài khoản, khóa/mở khóa tài khoản, thiết lập số dư và theo dõi toàn bộ hệ thống.
 - Cung cấp giao diện người dùng hiện đại, thân thiện và đầy đủ tính năng, phục vụ nhu cầu quản lý ngân hàng nhỏ.
 
 ✨ Các chức năng chính:
+
 - **Đăng nhập/Tạo tài khoản** khách hàng mới.
 - **Server**: quản lý tài khoản, xử lý giao dịch, theo dõi số dư, lưu trữ lịch sử giao dịch.
 - **Client**: kiểm tra số dư, chuyển tiền, xem lịch sử, khóa tài khoản.
 - **Lưu trữ**: dữ liệu được lưu trữ trong cơ sở dữ liệu **MySQL**, đảm bảo tính bền vững và an toàn.
 
 🎯 Mục tiêu hệ thống:
+
 - Số hóa ngân hàng: thay thế phương pháp quản lý thủ công bằng một hệ thống trực tuyến, dễ sử dụng và hiện đại.
 - Tối ưu trải nghiệm người dùng: hỗ trợ giao diện trực quan, xử lý giao dịch nhanh chóng, theo dõi số dư realtime.
-- Hỗ trợ quản trị viên (Admin): dễ dàng quản lý tài khoản, thiết lập số dư, khóa/mở khóa tài khoản, giám sát hoạt động giao dịch.  
+- Hỗ trợ quản trị viên (Admin): dễ dàng quản lý tài khoản, thiết lập số dư, khóa/mở khóa tài khoản, giám sát hoạt động giao dịch.
 
 ## 🔧 2. Các công nghệ được sử dụng
+
 - **Ngôn ngữ:** Java
 - **Giao diện:** Java Swing
-- **Giao thức mạng:** Java RMI (Remote Method Invocation) 
+- **Giao thức mạng:** Java RMI (Remote Method Invocation)
 - **Lưu trữ:** MySQL Database
 - **Môi trường phát triển:** Eclipse IDE
 - **Hệ điều hành:** Windows
@@ -59,6 +64,7 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 </div>
 
 ## 📷 3. Một số hình ảnh
+
 <p align="center">
 <p align="center">
   <img src="docs/Login.png" alt="1" width="500"/><br/>
@@ -104,23 +110,28 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 ## ⚙️ 4. Các bước cài đặt & sử dụng
 
 ### 1️⃣ Chuẩn bị môi trường
-- Cài đặt **Java JDK 8+** → [Tải tại đây](https://www.oracle.com/java/technologies/javase-downloads.html)  
-- Cài đặt **MySQL Server** → [Tải tại đây](https://dev.mysql.com/downloads/mysql/)  
-- Cài đặt **Eclipse IDE** → [Tải tại đây](https://www.eclipse.org/downloads/)  
-- Hệ điều hành: **Windows 10/11**.  
+
+- Cài đặt **Java JDK 8+** → [Tải tại đây](https://www.oracle.com/java/technologies/javase-downloads.html)
+- Cài đặt **MySQL Server** → [Tải tại đây](https://dev.mysql.com/downloads/mysql/)
+- Cài đặt **Eclipse IDE** → [Tải tại đây](https://www.eclipse.org/downloads/)
+- Hệ điều hành: **Windows 10/11**.
 
 ### 2️⃣ Tải source code
+
 - Clone dự án từ GitHub:  
-git clone https://github.com/your-username/QuanLyNganHangMini.git
-- Hoặc tải file `.zip` → giải nén.  
+  git clone https://github.com/your-username/QuanLyNganHangMini.git
+- Hoặc tải file `.zip` → giải nén.
 
 ### 3️⃣ Import dự án vào IDE
-- Mở **Eclipse IDE** → `File` → `Import` → `Existing Projects into Workspace`.  
-- Chọn thư mục dự án vừa tải về.  
-- Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.  
+
+- Mở **Eclipse IDE** → `File` → `Import` → `Existing Projects into Workspace`.
+- Chọn thư mục dự án vừa tải về.
+- Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.
 
 ### 4️⃣ Cấu hình cơ sở dữ liệu
-- Tạo database **bank_management** trong MySQL:  
+
+- Tạo database **bank_management** trong MySQL:
+
 ```sql
 CREATE DATABASE bank_management;
 USE bank_management;
@@ -156,48 +167,55 @@ CREATE INDEX idx_transactions_timestamp ON transactions(timestamp);
 INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
 ('2342004', 'Nguyen Quang Hiep', 1000000, '230404'),
 ```
+
 - Cập nhật thông tin kết nối trong `DatabaseConnection.java`:  
   username|password|host|database_name
 
 > 📌 Lưu ý: File này được server đọc & ghi trực tiếp. Khi chuyển tiền, dữ liệu sẽ tự động cập nhật.
 
 ### 5️⃣ Chạy chương trình
-- **Khởi động Server**  
-  - Mở file `BankServer.java` → Run.  
-  - Server sẽ hiển thị log RMI Registry và quản lý kết nối database.  
 
-- **Khởi động Client**  
-  - Mở file `BankClient.java` → Run.  
-  - Cửa sổ giao diện hiện ra cho phép đăng nhập, chuyển tiền, kiểm tra số dư từ xa.  
+- **Khởi động Server**
+
+  - Mở file `BankServer.java` → Run.
+  - Server sẽ hiển thị log RMI Registry và quản lý kết nối database.
+
+- **Khởi động Client**
+  - Mở file `BankClient.java` → Run.
+  - Cửa sổ giao diện hiện ra cho phép đăng nhập, chuyển tiền, kiểm tra số dư từ xa.
 
 ### 6️⃣ Đăng nhập / Tạo tài khoản
-- **Đăng nhập**: Sử dụng số tài khoản và mật khẩu đã tạo.  
-- **Tạo tài khoản**: Nhấn nút **Tạo tài khoản mới** trên Client để đăng ký.  
+
+- **Đăng nhập**: Sử dụng số tài khoản và mật khẩu đã tạo.
+- **Tạo tài khoản**: Nhấn nút **Tạo tài khoản mới** trên Client để đăng ký.
 
 ### 7️⃣ Thao tác chính trên hệ thống
-- **Kiểm tra số dư** → nhấn biểu tượng mắt để hiện/ẩn số dư.  
-- **Chuyển tiền** → nhập số tài khoản đích → số tiền → xác nhận.  
-- **Xem lịch sử giao dịch** → hiển thị tất cả giao dịch đã thực hiện.  
-- **Khóa tài khoản** → tự khóa tài khoản khi cần thiết.  
-- **Admin** → quản lý tài khoản, thiết lập số dư, khóa/mở tài khoản.  
+
+- **Kiểm tra số dư** → nhấn biểu tượng mắt để hiện/ẩn số dư.
+- **Chuyển tiền** → nhập số tài khoản đích → số tiền → xác nhận.
+- **Xem lịch sử giao dịch** → hiển thị tất cả giao dịch đã thực hiện.
+- **Khóa tài khoản** → tự khóa tài khoản khi cần thiết.
+- **Admin** → quản lý tài khoản, thiết lập số dư, khóa/mở tài khoản.
 
 ### 8️⃣ Tài khoản demo (mặc định)
+
 Ví dụ trong database:  
 2342004|230404|Nguyễn Quang Hiệp
 
 ### 9️⃣ Kết thúc phiên làm việc
-- Đóng cửa sổ **Client** để thoát.  
-- Dừng **Server** (Stop trong Eclipse) → dữ liệu đã được lưu lại vào database.  
 
+- Đóng cửa sổ **Client** để thoát.
+- Dừng **Server** (Stop trong Eclipse) → dữ liệu đã được lưu lại vào database.
 
 ✅ Sau khi hoàn tất các bước trên, bạn đã có thể sử dụng hệ thống **Quản lý ngân hàng mini** với đầy đủ tính năng đăng nhập, chuyển tiền, kiểm tra số dư qua Java RMI.
 
 ## ✉️ 5. Liên hệ (cá nhân)
-Nếu bạn cần trao đổi thêm hoặc muốn phát triển mở rộng hệ thống, vui lòng liên hệ:  
 
-- 👨‍💻 **Tác giả:** [Nguyễn Quang Hiệp]  
-- 📧 **Email:** [quanghiep2342004@gmail.com]  
-- 📱 **SĐT:** [0396259480]  
+Nếu bạn cần trao đổi thêm hoặc muốn phát triển mở rộng hệ thống, vui lòng liên hệ:
+
+- 👨‍💻 **Tác giả:** [Nguyễn Quang Hiệp]
+- 📧 **Email:** [quanghiep2342004@gmail.com]
+- 📱 **SĐT:** [0396259480]
 - 🌐 **GitHub:** [github.com/NguyenQuangHiep234]  
-<br/>
-© 2025 AIoTLab, Faculty of Information Technology, DaiNam University. All rights reserved.
+  <br/>
+  © 2025 AIoTLab, Faculty of Information Technology, DaiNam University. All rights reserved.
