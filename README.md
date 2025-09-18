@@ -120,7 +120,7 @@ git clone https://github.com/your-username/QuanLyNganHangMini.git
 - Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.  
 
 ### 4️⃣ Cấu hình cơ sở dữ liệu
-- Tạo database **bank_mini** trong MySQL:  
+- Tạo database **bank_management** trong MySQL:  
 ```sql
 CREATE DATABASE bank_management;
 USE bank_management;
