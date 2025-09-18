@@ -129,7 +129,7 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 ### 2️⃣ Tải source code
 
 - Clone dự án từ GitHub:  
-  git clone https://github.com/your-username/QuanLyNganHangMini.git
+  git clone https://github.com/NguyenQuangHiep234/QuanLyNganHangMini.git
 - Hoặc tải file `.zip` → giải nén.
 
 ### 3️⃣ Import dự án vào IDE
