@@ -65,47 +65,50 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 
 ## 📷 3. Một số hình ảnh
 
-<p align="center">
-<p align="center">
-  <img src="docs/Login.png" alt="1" width="500"/><br/>
-  <i>Hình 1: Giao diện "Đăng nhập"</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Register.png" alt="2" width="500"/><br/>
-  <i>Hình 2: Giao diện "Đăng ký"</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Admin.png" alt="3" width="500"/><br/>
-  <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Main.png" alt="4" width="500"/><br/>
-  <i>Hình 4: Giao diện chính</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Menu.png" alt="4" width="500"/><br/>
-  <i>Hình 5: Giao diện Menu</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Transfer.png" alt="4" width="500"/><br/>
-  <i>Hình 6: Giao diện "Chuyển khoản"</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/History.png" alt="4" width="500"/><br/>
-  <i>Hình 7: Giao diện "Lịch sử giao dịch"</i>
-</p>
-<br/>
-<p align="center">
-  <img src="docs/Lock.png" alt="4" width="500"/><br/>
-  <i>Hình 8: Tài khoản bị khóa</i>
-</p>
-</p>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/Login.png" alt="1" width="400"/><br/>
+        <i>Hình 1: Giao diện "Đăng nhập"</i>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/Register.png" alt="2" width="400"/><br/>
+        <i>Hình 2: Giao diện "Đăng ký"</i>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/Admin.png" alt="3" width="400"/><br/>
+        <i>Hình 3: Giao diện quản lý tài khoản của Admin</i>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/Main.png" alt="4" width="400"/><br/>
+        <i>Hình 4: Giao diện chính</i>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/Menu.png" alt="5" width="400"/><br/>
+        <i>Hình 5: Giao diện Menu</i>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/Transfer.png" alt="6" width="400"/><br/>
+        <i>Hình 6: Giao diện "Chuyển khoản"</i>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/History.png" alt="7" width="400"/><br/>
+        <i>Hình 7: Giao diện "Lịch sử giao dịch"</i>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/Lock.png" alt="8" width="400"/><br/>
+        <i>Hình 8: Tài khoản bị khóa</i>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## ⚙️ 4. Các bước cài đặt & sử dụng
 
