@@ -183,7 +183,7 @@ CREATE INDEX idx_transactions_timestamp ON transactions(timestamp);
 
 -- Thêm dữ liệu mẫu
 INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
-('2342004', 'Nguyen Quang Hiep', 1000000, '230404'),
+('2342004', 'Nguyen Quang Hiep', 1000000, '230404');
 ```
 
 - Cập nhật thông tin kết nối trong `DatabaseConnection.java`:  
