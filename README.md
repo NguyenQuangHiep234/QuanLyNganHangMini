@@ -189,7 +189,7 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
 - Cập nhật thông tin kết nối trong `DatabaseConnection.java`:  
   username|password|host|database_name
 
-### 5️⃣ Chạy chương trình
+### 6️⃣ Chạy chương trình
 
 - **Khởi động Server**
 
@@ -200,12 +200,12 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
   - Mở file `BankClient.java` → Run.
   - Cửa sổ giao diện hiện ra cho phép đăng nhập, chuyển tiền, kiểm tra số dư từ xa.
 
-### 6️⃣ Đăng nhập / Tạo tài khoản
+### 7️⃣ Đăng nhập / Tạo tài khoản
 
 - **Đăng nhập**: Sử dụng số tài khoản và mật khẩu đã tạo.
 - **Tạo tài khoản**: Nhấn nút **Tạo tài khoản mới** trên Client để đăng ký.
 
-### 7️⃣ Thao tác chính trên hệ thống
+### 8️⃣ Thao tác chính trên hệ thống
 
 - **Kiểm tra số dư** → nhấn biểu tượng mắt để hiện/ẩn số dư.
 - **Chuyển tiền** → nhập số tài khoản đích → số tiền → xác nhận.
@@ -213,12 +213,12 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
 - **Khóa tài khoản** → tự khóa tài khoản khi cần thiết.
 - **Admin** → quản lý tài khoản, thiết lập số dư, khóa/mở tài khoản.
 
-### 8️⃣ Tài khoản demo (mặc định)
+### 9️⃣ Tài khoản demo (mặc định)
 
 Ví dụ trong database:  
 2342004|230404|Nguyễn Quang Hiệp
 
-### 9️⃣ Kết thúc phiên làm việc
+### 🔟 Kết thúc phiên làm việc
 
 - Đóng cửa sổ **Client** để thoát.
 - Dừng **Server** (Stop trong Eclipse) → dữ liệu đã được lưu lại vào database.
