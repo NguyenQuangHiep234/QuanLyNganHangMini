@@ -1,10 +1,10 @@
 <h2 align="center">
     <a href="https://dainam.edu.vn/vi/khoa-cong-nghe-thong-tin">
-    �  FACULTY OF INFORMATION TECHNOLOGY (DAINAM UNIVERSITY)
+    🎓  FACULTY OF INFORMATION TECHNOLOGY (DAINAM UNIVERSITY)
     </a>
 </h2>
 <h2 align="center">
-    HỆ THỐNG QUẢN LÝ NGÂN HÀNG MINI - RMI
+    HỆ THỐNG QUẢN LÝ NGÂN HÀNG MINI
 </h2>
 
 <div align="center">
@@ -124,12 +124,13 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 - Cài đặt **Java JDK 8+** → [Tải tại đây](https://www.oracle.com/java/technologies/javase-downloads.html)
 - Cài đặt **MySQL Server** → [Tải tại đây](https://dev.mysql.com/downloads/mysql/)
 - Cài đặt **Eclipse IDE** → [Tải tại đây](https://www.eclipse.org/downloads/)
+- Tải **MySQL Connector/J** → [Tải tại đây](https://dev.mysql.com/downloads/connector/j/)
 - Hệ điều hành: **Windows 10/11**.
 
 ### 2️⃣ Tải source code
 
 - Clone dự án từ GitHub:  
-  git clone https://github.com/your-username/QuanLyNganHangMini.git
+  git clone https://github.com/NguyenQuangHiep234/QuanLyNganHangMini.git
 - Hoặc tải file `.zip` → giải nén.
 
 ### 3️⃣ Import dự án vào IDE
@@ -138,7 +139,14 @@ Hệ thống **Quản lý Ngân hàng Mini** được xây dựng theo mô hình
 - Chọn thư mục dự án vừa tải về.
 - Kiểm tra `Project → Properties → Java Build Path` để chắc chắn JDK đã được cấu hình đúng.
 
-### 4️⃣ Cấu hình cơ sở dữ liệu
+### 4️⃣ Thêm MySQL Connector/J vào Build Path
+- Giải nén file ZIP của MySQL Connector tải ở trên
+- Trong Eclipse, chuột phải project → Build Path → Configure Build Path
+- Tab Libraries → Add External JARs
+- Chọn file mysql-connector-java-*.*.*.jar từ folder vừa giải nén
+- Click Apply and Close
+
+### 5️⃣ Cấu hình cơ sở dữ liệu
 
 - Tạo database **bank_management** trong MySQL:
 
@@ -175,15 +183,13 @@ CREATE INDEX idx_transactions_timestamp ON transactions(timestamp);
 
 -- Thêm dữ liệu mẫu
 INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
-('2342004', 'Nguyen Quang Hiep', 1000000, '230404'),
+('2342004', 'Nguyen Quang Hiep', 1000000, '230404');
 ```
 
 - Cập nhật thông tin kết nối trong `DatabaseConnection.java`:  
   username|password|host|database_name
 
-> 📌 Lưu ý: File này được server đọc & ghi trực tiếp. Khi chuyển tiền, dữ liệu sẽ tự động cập nhật.
-
-### 5️⃣ Chạy chương trình
+### 6️⃣ Chạy chương trình
 
 - **Khởi động Server**
 
@@ -194,12 +200,12 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
   - Mở file `BankClient.java` → Run.
   - Cửa sổ giao diện hiện ra cho phép đăng nhập, chuyển tiền, kiểm tra số dư từ xa.
 
-### 6️⃣ Đăng nhập / Tạo tài khoản
+### 7️⃣ Đăng nhập / Tạo tài khoản
 
 - **Đăng nhập**: Sử dụng số tài khoản và mật khẩu đã tạo.
 - **Tạo tài khoản**: Nhấn nút **Tạo tài khoản mới** trên Client để đăng ký.
 
-### 7️⃣ Thao tác chính trên hệ thống
+### 8️⃣ Thao tác chính trên hệ thống
 
 - **Kiểm tra số dư** → nhấn biểu tượng mắt để hiện/ẩn số dư.
 - **Chuyển tiền** → nhập số tài khoản đích → số tiền → xác nhận.
@@ -207,12 +213,12 @@ INSERT INTO accounts (account_number, account_holder, balance, password) VALUES
 - **Khóa tài khoản** → tự khóa tài khoản khi cần thiết.
 - **Admin** → quản lý tài khoản, thiết lập số dư, khóa/mở tài khoản.
 
-### 8️⃣ Tài khoản demo (mặc định)
+### 9️⃣ Tài khoản demo (mặc định)
 
 Ví dụ trong database:  
 2342004|230404|Nguyễn Quang Hiệp
 
-### 9️⃣ Kết thúc phiên làm việc
+### 🔟 Kết thúc phiên làm việc
 
 - Đóng cửa sổ **Client** để thoát.
 - Dừng **Server** (Stop trong Eclipse) → dữ liệu đã được lưu lại vào database.
