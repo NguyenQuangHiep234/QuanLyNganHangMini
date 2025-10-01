@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 
 import com.bank.client.BankClient;
 import com.bank.common.Account;
+import com.bank.common.Transaction;
 
 public class AdminFrame extends JFrame {
     private BankClient client;
@@ -48,23 +49,28 @@ public class AdminFrame extends JFrame {
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 4; // Chỉ cho phép edit cột hành động
+                return column == 3 || column == 4; // Cho phép edit cột mật khẩu và hành động
             }
         };
 
         accountsTable = new JTable(tableModel);
         accountsTable.getColumnModel().getColumn(2).setCellRenderer(new RightAlignRenderer());
 
-        // Thêm 3 button vào cột hành động
+        // Thêm custom renderer cho cột mật khẩu với biểu tượng con mắt
+        accountsTable.getColumnModel().getColumn(3).setCellRenderer(new PasswordRenderer());
+        accountsTable.getColumnModel().getColumn(3).setCellEditor(new PasswordEditor());
+
+        // Thêm 6 button vào cột hành động (bỏ nút xem mật khẩu vì đã chuyển vào cột mật
+        // khẩu)
         accountsTable.getColumn("Hành động").setCellRenderer(new ButtonRenderer());
         accountsTable.getColumn("Hành động").setCellEditor(new ButtonEditor(new JCheckBox(), client));
 
-        // Tăng chiều rộng cột hành động để chứa 3 nút
-        accountsTable.getColumn("Hành động").setPreferredWidth(150);
-        accountsTable.getColumn("Hành động").setMinWidth(150);
+        // Tăng chiều rộng cột hành động để chứa 6 nút
+        accountsTable.getColumn("Hành động").setPreferredWidth(300);
+        accountsTable.getColumn("Hành động").setMinWidth(300);
 
-        // Tăng chiều cao row để chứa 3 nút
-        accountsTable.setRowHeight(50);
+        // Tăng chiều cao row để chứa 6 nút (2 dòng)
+        accountsTable.setRowHeight(70);
 
         JScrollPane scrollPane = new JScrollPane(accountsTable);
 
@@ -127,25 +133,157 @@ public class AdminFrame extends JFrame {
         }
     }
 
-    // Custom renderer cho panel 3 buttons
-    class ButtonRenderer extends JPanel implements TableCellRenderer {
-        private JButton setMoneyBtn, lockBtn, deleteBtn;
+    // Custom renderer cho cột mật khẩu với biểu tượng con mắt
+    class PasswordRenderer extends JPanel implements TableCellRenderer {
+        private JLabel passwordLabel;
+        private JLabel eyeLabel;
 
-        public ButtonRenderer() {
-            setLayout(new GridLayout(1, 3, 2, 0));
+        public PasswordRenderer() {
+            setLayout(new BorderLayout(5, 0));
             setOpaque(true);
 
-            // Nút Set tiền với icon đô
-            setMoneyBtn = new JButton("$");
-            setMoneyBtn.setBackground(new Color(40, 167, 69));
-            setMoneyBtn.setForeground(Color.WHITE);
-            setMoneyBtn.setFont(new Font("Arial", Font.BOLD, 16));
-            setMoneyBtn.setToolTipText("Set tiền");
-            setMoneyBtn.setFocusPainted(false);
-            setMoneyBtn.setBorderPainted(false);
+            passwordLabel = new JLabel("••••••••");
+            passwordLabel.setHorizontalAlignment(JLabel.LEFT);
 
-            // Nút Khóa
-            lockBtn = new JButton("LOCK");
+            eyeLabel = new JLabel("👁");
+            eyeLabel.setHorizontalAlignment(JLabel.CENTER);
+            eyeLabel.setPreferredSize(new Dimension(30, 20));
+            eyeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            add(passwordLabel, BorderLayout.CENTER);
+            add(eyeLabel, BorderLayout.EAST);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                setForeground(table.getSelectionForeground());
+                passwordLabel.setForeground(table.getSelectionForeground());
+            } else {
+                setBackground(table.getBackground());
+                setForeground(table.getForeground());
+                passwordLabel.setForeground(table.getForeground());
+            }
+
+            return this;
+        }
+    }
+
+    // Custom editor cho cột mật khẩu
+    class PasswordEditor extends DefaultCellEditor {
+        private JPanel panel;
+        private JLabel passwordLabel;
+        private JLabel eyeLabel;
+        private String accountNumber;
+        private boolean passwordVisible = false;
+
+        public PasswordEditor() {
+            super(new JCheckBox());
+
+            panel = new JPanel(new BorderLayout(5, 0));
+            panel.setOpaque(true);
+
+            passwordLabel = new JLabel("••••••••");
+            passwordLabel.setHorizontalAlignment(JLabel.LEFT);
+
+            eyeLabel = new JLabel("👁");
+            eyeLabel.setHorizontalAlignment(JLabel.CENTER);
+            eyeLabel.setPreferredSize(new Dimension(30, 20));
+            eyeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            eyeLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    togglePasswordVisibility();
+                }
+            });
+
+            panel.add(passwordLabel, BorderLayout.CENTER);
+            panel.add(eyeLabel, BorderLayout.EAST);
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            accountNumber = (String) table.getValueAt(row, 0);
+            passwordVisible = false;
+            passwordLabel.setText("••••••••");
+            eyeLabel.setText("👁");
+            return panel;
+        }
+
+        public Object getCellEditorValue() {
+            return "••••••••";
+        }
+
+        private void togglePasswordVisibility() {
+            try {
+                if (!passwordVisible) {
+                    // Hiển thị mật khẩu
+                    String password = client.getBankService().getUserPassword(accountNumber);
+                    if (password != null) {
+                        passwordLabel.setText(password);
+                        eyeLabel.setText("🙈");
+                        passwordVisible = true;
+                    }
+                } else {
+                    // Ẩn mật khẩu
+                    passwordLabel.setText("••••••••");
+                    eyeLabel.setText("👁");
+                    passwordVisible = false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(panel, "Lỗi: " + e.getMessage());
+            }
+        }
+    }
+
+    // Custom renderer cho panel 6 buttons
+    class ButtonRenderer extends JPanel implements TableCellRenderer {
+        private JButton depositBtn, withdrawBtn, changePasswordBtn, historyBtn, lockBtn, deleteBtn;
+
+        public ButtonRenderer() {
+            setLayout(new GridLayout(2, 3, 2, 2));
+            setOpaque(true);
+
+            // Nút Nạp tiền
+            depositBtn = new JButton("Add");
+            depositBtn.setBackground(new Color(40, 167, 69));
+            depositBtn.setForeground(Color.WHITE);
+            depositBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            depositBtn.setToolTipText("Nạp tiền vào tài khoản");
+            depositBtn.setFocusPainted(false);
+            depositBtn.setBorderPainted(false);
+
+            // Nút Rút tiền
+            withdrawBtn = new JButton("Sub");
+            withdrawBtn.setBackground(new Color(220, 53, 69));
+            withdrawBtn.setForeground(Color.WHITE);
+            withdrawBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            withdrawBtn.setToolTipText("Rút tiền từ tài khoản");
+            withdrawBtn.setFocusPainted(false);
+            withdrawBtn.setBorderPainted(false);
+
+            // Nút Đổi mật khẩu
+            changePasswordBtn = new JButton("Pwd");
+            changePasswordBtn.setBackground(new Color(0, 123, 255));
+            changePasswordBtn.setForeground(Color.WHITE);
+            changePasswordBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            changePasswordBtn.setToolTipText("Đổi mật khẩu");
+            changePasswordBtn.setFocusPainted(false);
+            changePasswordBtn.setBorderPainted(false);
+
+            // Nút Xem lịch sử
+            historyBtn = new JButton("His");
+            historyBtn.setBackground(new Color(108, 117, 125));
+            historyBtn.setForeground(Color.WHITE);
+            historyBtn.setFont(new Font("Arial", Font.BOLD, 10));
+            historyBtn.setToolTipText("Xem lịch sử giao dịch");
+            historyBtn.setFocusPainted(false);
+            historyBtn.setBorderPainted(false);
+
+            // Nút Khóa/Mở khóa
+            lockBtn = new JButton("Lock");
             lockBtn.setBackground(new Color(255, 193, 7));
             lockBtn.setForeground(Color.WHITE);
             lockBtn.setFont(new Font("Arial", Font.BOLD, 10));
@@ -154,7 +292,7 @@ public class AdminFrame extends JFrame {
             lockBtn.setBorderPainted(false);
 
             // Nút Xóa
-            deleteBtn = new JButton("DEL");
+            deleteBtn = new JButton("Del");
             deleteBtn.setBackground(new Color(220, 53, 69));
             deleteBtn.setForeground(Color.WHITE);
             deleteBtn.setFont(new Font("Arial", Font.BOLD, 10));
@@ -162,7 +300,10 @@ public class AdminFrame extends JFrame {
             deleteBtn.setFocusPainted(false);
             deleteBtn.setBorderPainted(false);
 
-            add(setMoneyBtn);
+            add(depositBtn);
+            add(withdrawBtn);
+            add(changePasswordBtn);
+            add(historyBtn);
             add(lockBtn);
             add(deleteBtn);
         }
@@ -176,12 +317,12 @@ public class AdminFrame extends JFrame {
 
             if (account != null && account.isLocked()) {
                 // Account is locked - show UNLOCK button
-                lockBtn.setText("UNLOCK");
+                lockBtn.setText("Unlock");
                 lockBtn.setBackground(new Color(40, 167, 69)); // Green color
                 lockBtn.setToolTipText("Mở khóa tài khoản");
             } else {
                 // Account is not locked - show LOCK button
-                lockBtn.setText("LOCK");
+                lockBtn.setText("Lock");
                 lockBtn.setBackground(new Color(255, 193, 7)); // Yellow color
                 lockBtn.setToolTipText("Khóa tài khoản");
             }
@@ -190,10 +331,10 @@ public class AdminFrame extends JFrame {
         }
     }
 
-    // Custom editor cho panel 3 buttons
+    // Custom editor cho panel 6 buttons
     class ButtonEditor extends DefaultCellEditor {
         private JPanel panel;
-        private JButton setMoneyBtn, lockBtn, deleteBtn;
+        private JButton depositBtn, withdrawBtn, changePasswordBtn, historyBtn, lockBtn, deleteBtn;
         private String accountNumber;
         private BankClient client;
 
@@ -201,27 +342,66 @@ public class AdminFrame extends JFrame {
             super(checkBox);
             this.client = client;
 
-            panel = new JPanel(new GridLayout(1, 3, 2, 0));
+            panel = new JPanel(new GridLayout(2, 3, 2, 2));
             panel.setOpaque(true);
 
-            // Nút Set tiền với icon đô
-            setMoneyBtn = new JButton("$");
-            setMoneyBtn.setBackground(new Color(40, 167, 69));
-            setMoneyBtn.setForeground(Color.WHITE);
-            setMoneyBtn.setFont(new Font("Arial", Font.BOLD, 16));
-            setMoneyBtn.setToolTipText("Set tiền");
-            setMoneyBtn.setFocusPainted(false);
-            setMoneyBtn.setBorderPainted(false);
-            setMoneyBtn.addActionListener(e -> {
+            // Nút Nạp tiền
+            depositBtn = new JButton("Add");
+            depositBtn.setBackground(new Color(40, 167, 69));
+            depositBtn.setForeground(Color.WHITE);
+            depositBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            depositBtn.setToolTipText("Nạp tiền vào tài khoản");
+            depositBtn.setFocusPainted(false);
+            depositBtn.setBorderPainted(false);
+            depositBtn.addActionListener(e -> {
                 fireEditingStopped();
-                showSetBalanceDialog(accountNumber);
+                showDepositDialog(accountNumber);
             });
 
-            // Nút Khóa
-            lockBtn = new JButton("LOCK");
+            // Nút Rút tiền
+            withdrawBtn = new JButton("Sub");
+            withdrawBtn.setBackground(new Color(220, 53, 69));
+            withdrawBtn.setForeground(Color.WHITE);
+            withdrawBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            withdrawBtn.setToolTipText("Rút tiền từ tài khoản");
+            withdrawBtn.setFocusPainted(false);
+            withdrawBtn.setBorderPainted(false);
+            withdrawBtn.addActionListener(e -> {
+                fireEditingStopped();
+                showWithdrawDialog(accountNumber);
+            });
+
+            // Nút Đổi mật khẩu
+            changePasswordBtn = new JButton("Pwd");
+            changePasswordBtn.setBackground(new Color(0, 123, 255));
+            changePasswordBtn.setForeground(Color.WHITE);
+            changePasswordBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            changePasswordBtn.setToolTipText("Đổi mật khẩu");
+            changePasswordBtn.setFocusPainted(false);
+            changePasswordBtn.setBorderPainted(false);
+            changePasswordBtn.addActionListener(e -> {
+                fireEditingStopped();
+                showChangePasswordDialog(accountNumber);
+            });
+
+            // Nút Xem lịch sử
+            historyBtn = new JButton("His");
+            historyBtn.setBackground(new Color(108, 117, 125));
+            historyBtn.setForeground(Color.WHITE);
+            historyBtn.setFont(new Font("Arial", Font.BOLD, 8));
+            historyBtn.setToolTipText("Xem lịch sử giao dịch");
+            historyBtn.setFocusPainted(false);
+            historyBtn.setBorderPainted(false);
+            historyBtn.addActionListener(e -> {
+                fireEditingStopped();
+                showUserHistoryDialog(accountNumber);
+            });
+
+            // Nút Khóa/Mở khóa
+            lockBtn = new JButton("Lock");
             lockBtn.setBackground(new Color(255, 193, 7));
             lockBtn.setForeground(Color.WHITE);
-            lockBtn.setFont(new Font("Arial", Font.BOLD, 10));
+            lockBtn.setFont(new Font("Arial", Font.BOLD, 8));
             lockBtn.setToolTipText("Khóa tài khoản");
             lockBtn.setFocusPainted(false);
             lockBtn.setBorderPainted(false);
@@ -238,10 +418,10 @@ public class AdminFrame extends JFrame {
             });
 
             // Nút Xóa
-            deleteBtn = new JButton("DEL");
+            deleteBtn = new JButton("Del");
             deleteBtn.setBackground(new Color(220, 53, 69));
             deleteBtn.setForeground(Color.WHITE);
-            deleteBtn.setFont(new Font("Arial", Font.BOLD, 10));
+            deleteBtn.setFont(new Font("Arial", Font.BOLD, 8));
             deleteBtn.setToolTipText("Xóa tài khoản");
             deleteBtn.setFocusPainted(false);
             deleteBtn.setBorderPainted(false);
@@ -250,7 +430,10 @@ public class AdminFrame extends JFrame {
                 showDeleteAccountDialog(accountNumber);
             });
 
-            panel.add(setMoneyBtn);
+            panel.add(depositBtn);
+            panel.add(withdrawBtn);
+            panel.add(changePasswordBtn);
+            panel.add(historyBtn);
             panel.add(lockBtn);
             panel.add(deleteBtn);
         }
@@ -263,12 +446,12 @@ public class AdminFrame extends JFrame {
             Account account = accountsMap.get(accountNumber);
             if (account != null && account.isLocked()) {
                 // Account is locked - show UNLOCK button
-                lockBtn.setText("UNLOCK");
+                lockBtn.setText("Unlock");
                 lockBtn.setBackground(new Color(40, 167, 69)); // Green color
                 lockBtn.setToolTipText("Mở khóa tài khoản");
             } else {
                 // Account is not locked - show LOCK button
-                lockBtn.setText("LOCK");
+                lockBtn.setText("Lock");
                 lockBtn.setBackground(new Color(255, 193, 7)); // Yellow color
                 lockBtn.setToolTipText("Khóa tài khoản");
             }
@@ -394,7 +577,81 @@ public class AdminFrame extends JFrame {
             }
         }
 
-        private void showSetBalanceDialog(String accountNumber) {
+        private void showAdjustBalanceDialog(String accountNumber) {
+            try {
+                Account account = client.getBankService().getAccountInfo(accountNumber);
+                if (account == null) {
+                    JOptionPane.showMessageDialog(AdminFrame.this, "Không tìm thấy tài khoản!");
+                    return;
+                }
+
+                JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+                panel.add(new JLabel("Số tài khoản:"));
+                JTextField txtAccount = new JTextField(account.getAccountNumber());
+                txtAccount.setEditable(false);
+                panel.add(txtAccount);
+
+                panel.add(new JLabel("Tên chủ tài khoản:"));
+                JTextField txtName = new JTextField(account.getAccountHolder());
+                txtName.setEditable(false);
+                panel.add(txtName);
+
+                panel.add(new JLabel("Số dư hiện tại:"));
+                JTextField txtCurrentBalance = new JTextField(currencyFormat.format(account.getBalance()));
+                txtCurrentBalance.setEditable(false);
+                panel.add(txtCurrentBalance);
+
+                panel.add(new JLabel("Số tiền điều chỉnh (+/-):"));
+                JTextField txtAmount = new JTextField();
+                panel.add(txtAmount);
+
+                JPanel reasonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+                reasonPanel.add(new JLabel("Lý do điều chỉnh:"));
+                JTextField txtReason = new JTextField();
+                reasonPanel.add(txtReason);
+
+                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+                mainPanel.add(panel, BorderLayout.CENTER);
+                mainPanel.add(reasonPanel, BorderLayout.SOUTH);
+
+                int result = JOptionPane.showConfirmDialog(AdminFrame.this, mainPanel,
+                        "Điều chỉnh số dư tài khoản", JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    try {
+                        double amount = Double.parseDouble(txtAmount.getText());
+                        String reason = txtReason.getText().trim();
+
+                        if (reason.isEmpty()) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Vui lòng nhập lý do điều chỉnh!");
+                            return;
+                        }
+
+                        boolean success = client.getBankService().adjustUserBalance(accountNumber, amount, reason);
+                        if (success) {
+                            double newBalance = account.getBalance() + amount;
+                            String operation = amount > 0 ? "+" : "";
+                            JOptionPane.showMessageDialog(AdminFrame.this,
+                                    "Điều chỉnh số dư thành công!\n" +
+                                            "Tài khoản: " + accountNumber + "\n" +
+                                            "Số dư cũ: " + currencyFormat.format(account.getBalance()) + "\n" +
+                                            "Điều chỉnh: " + operation + currencyFormat.format(amount) + "\n" +
+                                            "Số dư mới: " + currencyFormat.format(newBalance) + "\n" +
+                                            "Lý do: " + reason);
+                            loadAccountsData(); // Refresh data
+                        } else {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Điều chỉnh số dư thất bại!");
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền không hợp lệ!");
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
+            }
+        }
+
+        private void showChangePasswordDialog(String accountNumber) {
             try {
                 Account account = client.getBankService().getAccountInfo(accountNumber);
                 if (account == null) {
@@ -413,35 +670,273 @@ public class AdminFrame extends JFrame {
                 txtName.setEditable(false);
                 panel.add(txtName);
 
-                panel.add(new JLabel("Số dư mới (VND):"));
-                JTextField txtBalance = new JTextField(String.valueOf(account.getBalance()));
-                panel.add(txtBalance);
+                panel.add(new JLabel("Mật khẩu mới:"));
+                JPasswordField txtNewPassword = new JPasswordField();
+                panel.add(txtNewPassword);
 
                 int result = JOptionPane.showConfirmDialog(AdminFrame.this, panel,
-                        "Set số dư cho tài khoản", JOptionPane.OK_CANCEL_OPTION);
+                        "Đổi mật khẩu cho tài khoản", JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    String newPassword = new String(txtNewPassword.getPassword());
+                    if (newPassword.trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(AdminFrame.this, "Mật khẩu không được để trống!");
+                        return;
+                    }
+
+                    boolean success = client.getBankService().changeUserPassword(accountNumber, newPassword);
+                    if (success) {
+                        JOptionPane.showMessageDialog(AdminFrame.this,
+                                "Đổi mật khẩu thành công!\n" +
+                                        "Tài khoản: " + accountNumber + "\n" +
+                                        "Mật khẩu mới đã được cập nhật.");
+                    } else {
+                        JOptionPane.showMessageDialog(AdminFrame.this, "Đổi mật khẩu thất bại!");
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
+            }
+        }
+
+        private void showUserHistoryDialog(String accountNumber) {
+            try {
+                List<Transaction> transactions = client.getBankService().getUserTransactionHistory(accountNumber);
+
+                if (transactions == null || transactions.isEmpty()) {
+                    JOptionPane.showMessageDialog(AdminFrame.this, "Không có lịch sử giao dịch!");
+                    return;
+                }
+
+                // Tạo history window mới
+                JFrame historyFrame = new JFrame("Lịch sử giao dịch - " + accountNumber);
+                historyFrame.setSize(800, 600);
+                historyFrame.setLocationRelativeTo(AdminFrame.this);
+
+                String[] columns = { "ID Giao dịch", "Loại", "Số tiền", "Thời gian", "Mô tả" };
+                DefaultTableModel historyTableModel = new DefaultTableModel(columns, 0);
+
+                for (Transaction trans : transactions) {
+                    Object[] row = {
+                            trans.getTransactionId(),
+                            trans.getType(),
+                            currencyFormat.format(trans.getAmount()),
+                            trans.getTimestamp(),
+                            trans.getDescription()
+                    };
+                    historyTableModel.addRow(row);
+                }
+
+                JTable historyTable = new JTable(historyTableModel);
+                historyTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+                JScrollPane scrollPane = new JScrollPane(historyTable);
+
+                JButton closeBtn = new JButton("Đóng");
+                closeBtn.addActionListener(e -> historyFrame.dispose());
+
+                JPanel buttonPanel = new JPanel(new FlowLayout());
+                buttonPanel.add(closeBtn);
+
+                historyFrame.add(scrollPane, BorderLayout.CENTER);
+                historyFrame.add(buttonPanel, BorderLayout.SOUTH);
+                historyFrame.setVisible(true);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
+            }
+        }
+
+        private void showDepositDialog(String accountNumber) {
+            try {
+                Account account = client.getBankService().getAccountInfo(accountNumber);
+                if (account == null) {
+                    JOptionPane.showMessageDialog(AdminFrame.this, "Không tìm thấy tài khoản!");
+                    return;
+                }
+
+                JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+                panel.add(new JLabel("Số tài khoản:"));
+                JTextField txtAccount = new JTextField(account.getAccountNumber());
+                txtAccount.setEditable(false);
+                panel.add(txtAccount);
+
+                panel.add(new JLabel("Tên chủ tài khoản:"));
+                JTextField txtName = new JTextField(account.getAccountHolder());
+                txtName.setEditable(false);
+                panel.add(txtName);
+
+                panel.add(new JLabel("Số dư hiện tại:"));
+                JTextField txtCurrentBalance = new JTextField(currencyFormat.format(account.getBalance()));
+                txtCurrentBalance.setEditable(false);
+                panel.add(txtCurrentBalance);
+
+                panel.add(new JLabel("Số tiền nạp (+):"));
+                JTextField txtAmount = new JTextField();
+                panel.add(txtAmount);
+
+                JPanel reasonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+                reasonPanel.add(new JLabel("Lý do nạp tiền:"));
+                JTextField txtReason = new JTextField();
+                reasonPanel.add(txtReason);
+
+                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+                mainPanel.add(panel, BorderLayout.CENTER);
+                mainPanel.add(reasonPanel, BorderLayout.SOUTH);
+
+                int result = JOptionPane.showConfirmDialog(AdminFrame.this, mainPanel,
+                        "Nạp tiền vào tài khoản", JOptionPane.OK_CANCEL_OPTION);
 
                 if (result == JOptionPane.OK_OPTION) {
                     try {
-                        double newBalance = Double.parseDouble(txtBalance.getText());
-                        if (newBalance < 0) {
-                            JOptionPane.showMessageDialog(AdminFrame.this, "Số dư không thể âm!");
+                        double amount = Double.parseDouble(txtAmount.getText());
+                        String reason = txtReason.getText().trim();
+
+                        if (amount <= 0) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền nạp phải lớn hơn 0!");
                             return;
                         }
 
-                        boolean success = client.getBankService().setAccountBalance(accountNumber, newBalance);
+                        if (reason.isEmpty()) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Vui lòng nhập lý do nạp tiền!");
+                            return;
+                        }
+
+                        boolean success = client.getBankService().adjustUserBalance(accountNumber, amount, reason);
                         if (success) {
+                            double newBalance = account.getBalance() + amount;
                             JOptionPane.showMessageDialog(AdminFrame.this,
-                                    "Đã set số dư thành công!\n" +
+                                    "Nạp tiền thành công!\n" +
                                             "Tài khoản: " + accountNumber + "\n" +
-                                            "Số dư mới: " + currencyFormat.format(newBalance));
+                                            "Số dư cũ: " + currencyFormat.format(account.getBalance()) + "\n" +
+                                            "Số tiền nạp: +" + currencyFormat.format(amount) + "\n" +
+                                            "Số dư mới: " + currencyFormat.format(newBalance) + "\n" +
+                                            "Lý do: " + reason);
                             loadAccountsData(); // Refresh data
                         } else {
-                            JOptionPane.showMessageDialog(AdminFrame.this, "Set số dư thất bại!");
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Nạp tiền thất bại!");
                         }
                     } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(AdminFrame.this, "Số dư không hợp lệ!");
+                        JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền không hợp lệ!");
                     }
                 }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
+            }
+        }
+
+        private void showWithdrawDialog(String accountNumber) {
+            try {
+                Account account = client.getBankService().getAccountInfo(accountNumber);
+                if (account == null) {
+                    JOptionPane.showMessageDialog(AdminFrame.this, "Không tìm thấy tài khoản!");
+                    return;
+                }
+
+                JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+                panel.add(new JLabel("Số tài khoản:"));
+                JTextField txtAccount = new JTextField(account.getAccountNumber());
+                txtAccount.setEditable(false);
+                panel.add(txtAccount);
+
+                panel.add(new JLabel("Tên chủ tài khoản:"));
+                JTextField txtName = new JTextField(account.getAccountHolder());
+                txtName.setEditable(false);
+                panel.add(txtName);
+
+                panel.add(new JLabel("Số dư hiện tại:"));
+                JTextField txtCurrentBalance = new JTextField(currencyFormat.format(account.getBalance()));
+                txtCurrentBalance.setEditable(false);
+                panel.add(txtCurrentBalance);
+
+                panel.add(new JLabel("Số tiền rút (-):"));
+                JTextField txtAmount = new JTextField();
+                panel.add(txtAmount);
+
+                JPanel reasonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+                reasonPanel.add(new JLabel("Lý do rút tiền:"));
+                JTextField txtReason = new JTextField();
+                reasonPanel.add(txtReason);
+
+                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+                mainPanel.add(panel, BorderLayout.CENTER);
+                mainPanel.add(reasonPanel, BorderLayout.SOUTH);
+
+                int result = JOptionPane.showConfirmDialog(AdminFrame.this, mainPanel,
+                        "Rút tiền từ tài khoản", JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    try {
+                        double amount = Double.parseDouble(txtAmount.getText());
+                        String reason = txtReason.getText().trim();
+
+                        if (amount <= 0) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền rút phải lớn hơn 0!");
+                            return;
+                        }
+
+                        if (reason.isEmpty()) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Vui lòng nhập lý do rút tiền!");
+                            return;
+                        }
+
+                        if (amount > account.getBalance()) {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền rút vượt quá số dư hiện tại!");
+                            return;
+                        }
+
+                        boolean success = client.getBankService().adjustUserBalance(accountNumber, -amount, reason);
+                        if (success) {
+                            double newBalance = account.getBalance() - amount;
+                            JOptionPane.showMessageDialog(AdminFrame.this,
+                                    "Rút tiền thành công!\n" +
+                                            "Tài khoản: " + accountNumber + "\n" +
+                                            "Số dư cũ: " + currencyFormat.format(account.getBalance()) + "\n" +
+                                            "Số tiền rút: -" + currencyFormat.format(amount) + "\n" +
+                                            "Số dư mới: " + currencyFormat.format(newBalance) + "\n" +
+                                            "Lý do: " + reason);
+                            loadAccountsData(); // Refresh data
+                        } else {
+                            JOptionPane.showMessageDialog(AdminFrame.this, "Rút tiền thất bại!");
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(AdminFrame.this, "Số tiền không hợp lệ!");
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
+            }
+        }
+
+        private void showViewPasswordDialog(String accountNumber) {
+            try {
+                String password = client.getBankService().getUserPassword(accountNumber);
+                if (password == null) {
+                    JOptionPane.showMessageDialog(AdminFrame.this, "Không tìm thấy tài khoản!");
+                    return;
+                }
+
+                Account account = client.getBankService().getAccountInfo(accountNumber);
+
+                JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+                panel.add(new JLabel("Số tài khoản:"));
+                JTextField txtAccount = new JTextField(accountNumber);
+                txtAccount.setEditable(false);
+                panel.add(txtAccount);
+
+                panel.add(new JLabel("Tên chủ tài khoản:"));
+                JTextField txtName = new JTextField(account != null ? account.getAccountHolder() : "N/A");
+                txtName.setEditable(false);
+                panel.add(txtName);
+
+                panel.add(new JLabel("Mật khẩu:"));
+                JTextField txtPassword = new JTextField(password);
+                txtPassword.setEditable(false);
+                txtPassword.setBackground(Color.YELLOW);
+                panel.add(txtPassword);
+
+                JOptionPane.showMessageDialog(AdminFrame.this, panel, "Thông tin mật khẩu tài khoản",
+                        JOptionPane.INFORMATION_MESSAGE);
+
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
             }

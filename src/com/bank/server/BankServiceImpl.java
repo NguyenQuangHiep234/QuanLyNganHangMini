@@ -21,6 +21,9 @@ public class BankServiceImpl extends UnicastRemoteObject implements BankService 
     private Map<String, Long> cacheTimestamps = new HashMap<>();
     private static final long CACHE_TIMEOUT = 30000; // 30 seconds
 
+    // Session management for tracking active clients
+    private Map<String, List<String>> activeSessions = new HashMap<>(); // accountNumber -> list of sessionIds
+
     protected BankServiceImpl() throws RemoteException {
         super();
         testDatabaseConnection();
@@ -127,6 +130,12 @@ public class BankServiceImpl extends UnicastRemoteObject implements BankService 
 
     @Override
     public double checkBalance(String accountNumber) throws RemoteException {
+        // Kiểm tra trạng thái tài khoản trước khi cho phép xem số dư
+        if (!validateAccountStatus(accountNumber)) {
+            System.out.println("CheckBalance bị từ chối: Tài khoản " + accountNumber + " đã bị khóa");
+            throw new RemoteException("Tài khoản đã bị khóa. Vui lòng liên hệ ngân hàng.");
+        }
+
         String sql = "SELECT balance FROM accounts WHERE account_number = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -185,6 +194,12 @@ public class BankServiceImpl extends UnicastRemoteObject implements BankService 
 
     @Override
     public boolean transfer(String fromAccount, String toAccount, double amount) throws RemoteException {
+        // Kiểm tra trạng thái tài khoản trước khi thực hiện giao dịch
+        if (!validateAccountStatus(fromAccount)) {
+            System.out.println("Transfer bị từ chối: Tài khoản " + fromAccount + " đã bị khóa");
+            return false;
+        }
+
         if (amount <= 0)
             return false;
         if (fromAccount.equals(toAccount))
@@ -580,6 +595,183 @@ public class BankServiceImpl extends UnicastRemoteObject implements BankService 
             System.err.println("Lỗi kết nối database khi mở khóa tài khoản: " + e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean changeUserPassword(String accountNumber, String newPassword) throws RemoteException {
+        String sql = "UPDATE accounts SET password = ? WHERE account_number = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newPassword);
+            pstmt.setString(2, accountNumber);
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Admin đã đổi mật khẩu cho tài khoản: " + accountNumber);
+                return true;
+            } else {
+                System.err.println("Không tìm thấy tài khoản: " + accountNumber);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi đổi mật khẩu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public List<Transaction> getUserTransactionHistory(String accountNumber) throws RemoteException {
+        return getTransactionHistory(accountNumber);
+    }
+
+    @Override
+    public boolean adjustUserBalance(String accountNumber, double amount, String reason) throws RemoteException {
+        String checkBalanceSQL = "SELECT balance FROM accounts WHERE account_number = ?";
+        String updateBalanceSQL = "UPDATE accounts SET balance = balance + ? WHERE account_number = ?";
+        String insertTransactionSQL = "INSERT INTO transactions (transaction_id, account_number, type, amount, timestamp, description) VALUES (?, ?, ?, ?, NOW(), ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                // Kiểm tra tài khoản tồn tại và lấy số dư hiện tại
+                PreparedStatement checkStmt = conn.prepareStatement(checkBalanceSQL);
+                checkStmt.setString(1, accountNumber);
+                ResultSet rs = checkStmt.executeQuery();
+
+                if (!rs.next()) {
+                    System.err.println("Không tìm thấy tài khoản: " + accountNumber);
+                    conn.rollback();
+                    return false;
+                }
+
+                double currentBalance = rs.getDouble("balance");
+                double newBalance = currentBalance + amount;
+
+                // Kiểm tra số dư sau khi điều chỉnh không được âm
+                if (newBalance < 0) {
+                    System.err.println("Không thể điều chỉnh: số dư sẽ âm (" + newBalance + ")");
+                    conn.rollback();
+                    return false;
+                }
+
+                // Cập nhật số dư
+                PreparedStatement updateStmt = conn.prepareStatement(updateBalanceSQL);
+                updateStmt.setDouble(1, amount);
+                updateStmt.setString(2, accountNumber);
+                int rowsAffected = updateStmt.executeUpdate();
+
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    return false;
+                }
+
+                // Ghi log giao dịch
+                String transactionId = UUID.randomUUID().toString();
+                PreparedStatement transStmt = conn.prepareStatement(insertTransactionSQL);
+                transStmt.setString(1, transactionId);
+                transStmt.setString(2, accountNumber);
+                transStmt.setString(3, amount > 0 ? "ADMIN_CREDIT" : "ADMIN_DEBIT");
+                transStmt.setDouble(4, Math.abs(amount));
+                transStmt.setString(5, "Admin điều chỉnh số dư: " + reason);
+                transStmt.executeUpdate();
+
+                conn.commit();
+
+                String operation = amount > 0 ? "+" : "";
+                System.out.println("Admin đã điều chỉnh tài khoản " + accountNumber + ": " + operation + amount
+                        + " VND. Lý do: " + reason);
+
+                // Clear cache
+                accountCache.remove(accountNumber);
+                cacheTimestamps.remove(accountNumber);
+
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.err.println("Lỗi điều chỉnh số dư: " + e.getMessage());
+                throw e;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi kết nối database: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public String getUserPassword(String accountNumber) throws RemoteException {
+        String sql = "SELECT password FROM accounts WHERE account_number = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, accountNumber);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("password");
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy mật khẩu: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ===== SESSION MANAGEMENT AND ACCOUNT STATUS METHODS =====
+
+    @Override
+    public boolean isAccountActive(String accountNumber) throws RemoteException {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT is_locked FROM accounts WHERE account_number = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, accountNumber);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    return !rs.getBoolean("is_locked"); // Active nếu không bị khóa
+                }
+                return false; // Tài khoản không tồn tại
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi kiểm tra trạng thái tài khoản: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public synchronized void registerActiveSession(String accountNumber, String sessionId) throws RemoteException {
+        activeSessions.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(sessionId);
+        System.out.println("Đã đăng ký session " + sessionId + " cho tài khoản " + accountNumber);
+    }
+
+    @Override
+    public synchronized void unregisterActiveSession(String accountNumber, String sessionId) throws RemoteException {
+        List<String> sessions = activeSessions.get(accountNumber);
+        if (sessions != null) {
+            sessions.remove(sessionId);
+            if (sessions.isEmpty()) {
+                activeSessions.remove(accountNumber);
+            }
+        }
+        System.out.println("Đã hủy đăng ký session " + sessionId + " cho tài khoản " + accountNumber);
+    }
+
+    // Utility method để kiểm tra account status trước mọi operation quan trọng
+    private boolean validateAccountStatus(String accountNumber) throws RemoteException {
+        if (!isAccountActive(accountNumber)) {
+            System.out.println("Tài khoản " + accountNumber + " đã bị khóa, từ chối thao tác");
+            return false;
+        }
+        return true;
     }
 
     // Phương thức để đóng kết nối khi tắt server

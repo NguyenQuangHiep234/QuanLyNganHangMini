@@ -175,6 +175,10 @@ public class LoginFrame extends JFrame {
 
                 JOptionPane.showMessageDialog(this, "Đăng nhập thành công!", "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
+
+                // Đăng ký session cho tài khoản
+                client.setCurrentAccountNumber(account.getAccountNumber());
+
                 new MainFrame(client, account);
                 dispose();
             } else {

@@ -39,6 +39,23 @@ public interface BankService extends Remote {
     // Utility methods
     boolean accountExists(String accountNumber) throws RemoteException;
 
-    // 🔥 THÊM PHƯƠNG THỨC MỚI: Admin set tiền
+    // Admin operations
+    boolean changeUserPassword(String accountNumber, String newPassword) throws RemoteException;
+
+    List<Transaction> getUserTransactionHistory(String accountNumber) throws RemoteException;
+
+    boolean adjustUserBalance(String accountNumber, double amount, String reason) throws RemoteException;
+
+    String getUserPassword(String accountNumber) throws RemoteException;
+
+    // Session management and account status checking
+    boolean isAccountActive(String accountNumber) throws RemoteException;
+
+    void registerActiveSession(String accountNumber, String sessionId) throws RemoteException;
+
+    void unregisterActiveSession(String accountNumber, String sessionId) throws RemoteException;
+
+    // 🔥 THÊM PHƯƠNG THỨC MỚI: Admin set tiền (deprecated - use adjustUserBalance
+    // instead)
     boolean setAccountBalance(String accountNumber, double newBalance) throws RemoteException;
 }

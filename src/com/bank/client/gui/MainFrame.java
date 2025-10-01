@@ -17,12 +17,14 @@ public class MainFrame extends JFrame {
     private JPanel sidePanel; // Panel trượt từ bên trái
     private JPanel overlayPanel; // Panel overlay để chặn tương tác background
     private boolean sideMenuOpen = false; // Trạng thái menu
+    private Timer accountStatusTimer; // Timer để kiểm tra trạng thái tài khoản
 
     public MainFrame(BankClient client, Account account) {
         this.client = client;
         this.currentAccount = account;
         this.currencyFormat = new DecimalFormat("#,### VND");
         initializeUI();
+        startAccountStatusMonitoring();
     }
 
     private void initializeUI() {
@@ -116,7 +118,7 @@ public class MainFrame extends JFrame {
         lblBalance.setFont(new Font("Segoe UI", Font.BOLD, 18)); // Tăng font size
         lblBalance.setForeground(Color.WHITE); // Chữ trắng để nổi bật trên nền xanh gradient
 
-        JButton btnToggleBalance = new JButton("�"); // Thay bằng kính lúp để tránh lỗi font
+        JButton btnToggleBalance = new JButton("👁️"); // Thay bằng kính lúp để tránh lỗi font
         btnToggleBalance.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16)); // Tăng font size
         btnToggleBalance.setPreferredSize(new Dimension(40, 35)); // Tăng kích thước
         btnToggleBalance.setBackground(new Color(255, 255, 255, 40)); // Nền trắng nhẹ trong suốt
@@ -591,5 +593,48 @@ public class MainFrame extends JFrame {
                         JOptionPane.INFORMATION_MESSAGE);
             }
         }
+    }
+
+    // ===== ACCOUNT STATUS MONITORING =====
+
+    private void startAccountStatusMonitoring() {
+        // Kiểm tra trạng thái tài khoản mỗi 5 giây
+        accountStatusTimer = new Timer(5000, e -> checkAccountStatus());
+        accountStatusTimer.start();
+    }
+
+    private void checkAccountStatus() {
+        try {
+            if (!client.isCurrentAccountActive()) {
+                // Tài khoản đã bị khóa
+                accountStatusTimer.stop();
+
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this,
+                            "Tài khoản của bạn đã bị khóa bởi quản trị viên.\n" +
+                                    "Bạn sẽ được đăng xuất ngay lập tức.\n" +
+                                    "Vui lòng liên hệ ngân hàng để được hỗ trợ.",
+                            "Tài khoản bị khóa",
+                            JOptionPane.WARNING_MESSAGE);
+
+                    // Logout và quay về login screen
+                    client.logout();
+                    new LoginFrame(client);
+                    dispose();
+                });
+            }
+        } catch (Exception ex) {
+            System.err.println("Lỗi kiểm tra trạng thái tài khoản: " + ex.getMessage());
+        }
+    }
+
+    // Override để đảm bảo cleanup khi đóng window
+    @Override
+    public void dispose() {
+        if (accountStatusTimer != null) {
+            accountStatusTimer.stop();
+        }
+        client.logout();
+        super.dispose();
     }
 }
