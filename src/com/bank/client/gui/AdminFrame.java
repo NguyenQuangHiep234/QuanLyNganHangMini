@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -32,17 +33,69 @@ public class AdminFrame extends JFrame {
 
     private void initializeUI() {
         setTitle("Quản trị hệ thống - Ngân hàng Mini");
-        setSize(900, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(null);
 
-        // Main panel
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        // Main panel with modern background
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Title
-        JLabel lblTitle = new JLabel("QUẢN TRỊ HỆ THỐNG", JLabel.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        lblTitle.setForeground(new Color(0, 102, 204));
+                int w = getWidth(), h = getHeight();
+                // Subtle gradient background
+                Color color1 = new Color(248, 250, 252);
+                Color color2 = new Color(241, 245, 249);
+                GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, w, h);
+            }
+        };
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setOpaque(false);
+
+        // Modern header with gradient
+        JPanel headerPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 20;
+
+                // Admin gradient - darker blue
+                Color color1 = new Color(21, 101, 192);
+                Color color2 = new Color(69, 90, 100);
+                GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                g2d.setPaint(gp);
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Subtle shadow
+                g2d.setColor(new Color(0, 0, 0, 50));
+                g2d.fillRoundRect(2, 2, w - 4, h - 4, arc, arc);
+            }
+        };
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        headerPanel.setPreferredSize(new Dimension(1000, 80));
+        headerPanel.setOpaque(false);
+
+        // Header content
+        JLabel lblTitle = new JLabel("⚙️ QUẢN TRỊ HỆ THỐNG", JLabel.LEFT);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitle.setForeground(Color.WHITE);
+        headerPanel.add(lblTitle, BorderLayout.WEST);
+
+        JLabel lblSubtitle = new JLabel("Ngân hàng Mini - Quản lý tài khoản", JLabel.RIGHT);
+        lblSubtitle.setFont(new Font("Segoe UI Light", Font.PLAIN, 14));
+        lblSubtitle.setForeground(new Color(220, 220, 220));
+        headerPanel.add(lblSubtitle, BorderLayout.EAST);
 
         // Tạo table để hiển thị accounts
         String[] columns = { "Số TK", "Tên chủ TK", "Số dư", "Mật khẩu", "Hành động" };
@@ -65,22 +118,28 @@ public class AdminFrame extends JFrame {
         accountsTable.getColumn("Hành động").setCellRenderer(new ButtonRenderer());
         accountsTable.getColumn("Hành động").setCellEditor(new ButtonEditor(new JCheckBox(), client));
 
-        // Tăng chiều rộng cột hành động để chứa 6 nút
-        accountsTable.getColumn("Hành động").setPreferredWidth(300);
-        accountsTable.getColumn("Hành động").setMinWidth(300);
-
-        // Tăng chiều cao row để chứa 6 nút (2 dòng)
-        accountsTable.setRowHeight(70);
+        // Modern table styling
+        accountsTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        accountsTable.setRowHeight(60);
+        accountsTable.setGridColor(new Color(224, 224, 224));
+        accountsTable.setSelectionBackground(new Color(25, 118, 210, 50));
+        accountsTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        accountsTable.getTableHeader().setBackground(new Color(245, 245, 245));
+        accountsTable.getTableHeader().setForeground(new Color(33, 33, 33));
 
         JScrollPane scrollPane = new JScrollPane(accountsTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
 
-        // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        // Modern button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        buttonPanel.setOpaque(false);
 
-        JButton btnRefresh = new JButton("Làm mới");
+        JButton btnRefresh = createModernButton("🔄 Làm mới", new Color(76, 175, 80), Color.WHITE);
+        btnRefresh.setPreferredSize(new Dimension(150, 45));
         btnRefresh.addActionListener(e -> loadAccountsData());
 
-        JButton btnLogout = new JButton("Đăng xuất");
+        JButton btnLogout = createModernButton("🚪 Đăng xuất", new Color(244, 67, 54), Color.WHITE);
+        btnLogout.setPreferredSize(new Dimension(150, 45));
         btnLogout.addActionListener(e -> {
             dispose();
             new LoginFrame(client);
@@ -90,6 +149,7 @@ public class AdminFrame extends JFrame {
         buttonPanel.add(btnLogout);
 
         mainPanel.add(lblTitle, BorderLayout.NORTH);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -941,5 +1001,62 @@ public class AdminFrame extends JFrame {
                 JOptionPane.showMessageDialog(AdminFrame.this, "Lỗi: " + e.getMessage());
             }
         }
+    }
+
+    // Phương thức tạo nút modern với rounded corners và hover effect
+    private JButton createModernButton(String text, Color bgColor, Color textColor) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 15; // Rounded corner radius
+
+                // Background color with hover effect
+                boolean hovered = Boolean.TRUE.equals(getClientProperty("hovered"));
+                Color background = hovered ? bgColor.darker() : bgColor;
+                g2d.setColor(background);
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Subtle border
+                g2d.setColor(new Color(255, 255, 255, 100));
+                g2d.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
+
+                // Soft shadow
+                g2d.setColor(new Color(0, 0, 0, 30));
+                g2d.fillRoundRect(2, 2, w - 4, h - 4, arc, arc);
+
+                super.paintComponent(g);
+            }
+        };
+
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(textColor);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                JButton btn = (JButton) e.getSource();
+                btn.putClientProperty("hovered", true);
+                btn.repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                JButton btn = (JButton) e.getSource();
+                btn.putClientProperty("hovered", false);
+                btn.repaint();
+            }
+        });
+
+        return button;
     }
 }

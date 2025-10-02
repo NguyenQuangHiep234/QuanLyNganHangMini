@@ -72,6 +72,23 @@ public class BankClient {
     }
 
     public static void main(String[] args) {
+        // Set modern Look and Feel
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            // If Nimbus is not available, use default
+            try {
+                javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ex) {
+                // Ignore
+            }
+        }
+
         BankClient client = new BankClient();
         if (client.getBankService() != null) {
             new LoginFrame(client);

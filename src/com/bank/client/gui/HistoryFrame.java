@@ -56,11 +56,11 @@ public class HistoryFrame extends JFrame {
         headerPanel.setPreferredSize(new Dimension(800, 80));
 
         JLabel lblTitle = new JLabel("LỊCH SỬ GIAO DỊCH", JLabel.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblTitle.setForeground(Color.WHITE);
 
         JLabel lblAccount = new JLabel("Tài khoản: " + account.getAccountNumber(), JLabel.CENTER);
-        lblAccount.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblAccount.setFont(new Font("Segoe UI Light", Font.PLAIN, 14));
         lblAccount.setForeground(new Color(220, 235, 255));
 
         JPanel titlePanel = new JPanel(new BorderLayout());
@@ -88,8 +88,8 @@ public class HistoryFrame extends JFrame {
         table = new JTable(tableModel);
         table.setFillsViewportHeight(true);
         table.setRowHeight(30);
-        table.setFont(new Font("Arial", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         table.getTableHeader().setBackground(new Color(64, 150, 255));
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setPreferredSize(new Dimension(0, 35));

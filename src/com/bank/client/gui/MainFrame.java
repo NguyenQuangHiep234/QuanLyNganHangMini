@@ -17,6 +17,8 @@ public class MainFrame extends JFrame {
     private JPanel sidePanel; // Panel trượt từ bên trái
     private JPanel overlayPanel; // Panel overlay để chặn tương tác background
     private boolean sideMenuOpen = false; // Trạng thái menu
+    private float sideMenuAlpha = 0.0f; // Alpha cho animation
+    private Timer sideMenuTimer; // Timer cho animation
     private Timer accountStatusTimer; // Timer để kiểm tra trạng thái tài khoản
 
     public MainFrame(BankClient client, Account account) {
@@ -38,24 +40,36 @@ public class MainFrame extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
         mainPanel.setBackground(new Color(245, 248, 252)); // Light blue-gray background
 
-        // ===== HEADER với gradient xanh ngân hàng =====
+        // ===== HEADER với gradient xanh ngân hàng hiện đại =====
         JPanel headerPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
                 int w = getWidth(), h = getHeight();
-                Color color1 = new Color(64, 150, 255); // Blue nhẹ hơn
-                Color color2 = new Color(30, 120, 220); // Dark blue nhẹ hơn
+                int arc = 30; // Rounded corner radius
+
+                // Modern gradient: từ xanh dương đậm đến xanh dương nhạt
+                Color color1 = new Color(25, 118, 210); // Material Blue 700
+                Color color2 = new Color(100, 181, 246); // Material Blue 300
                 GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
                 g2d.setPaint(gp);
-                g2d.fillRect(0, 0, w, h);
+
+                // Vẽ rounded rectangle cho header
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Thêm subtle shadow effect
+                g2d.setColor(new Color(0, 0, 0, 50));
+                g2d.fillRoundRect(2, 2, w - 4, h - 4, arc, arc);
             }
         };
         headerPanel.setLayout(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 30, 20));
         headerPanel.setPreferredSize(new Dimension(400, 250)); // Tăng chiều cao để chứa balance card
+        headerPanel.setOpaque(false); // Để paintComponent hoạt động
 
         // Top section với hamburger menu
         JPanel topSection = new JPanel(new BorderLayout());
@@ -105,12 +119,35 @@ public class MainFrame extends JFrame {
         lblAccountNumber.setForeground(new Color(220, 220, 220));
         lblAccountNumber.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Balance panel trong suốt hòa với header
-        JPanel balanceCard = new JPanel();
-        balanceCard.setOpaque(false); // Trong suốt để hòa với header gradient
-        balanceCard.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20)); // Chỉ có padding, không có border
-        balanceCard.setMaximumSize(new Dimension(350, 70)); // Tăng kích thước
-        balanceCard.setPreferredSize(new Dimension(350, 70)); // Thêm preferred size
+        // Balance panel với modern card design
+        JPanel balanceCard = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 15; // Rounded corner radius
+
+                // Semi-transparent white background for glassmorphism effect
+                g2d.setColor(new Color(255, 255, 255, 200));
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Subtle border
+                g2d.setColor(new Color(255, 255, 255, 100));
+                g2d.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
+
+                // Soft shadow
+                g2d.setColor(new Color(0, 0, 0, 30));
+                g2d.fillRoundRect(3, 3, w - 6, h - 6, arc, arc);
+            }
+        };
+        balanceCard.setOpaque(false); // Để paintComponent hoạt động
+        balanceCard.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20)); // Padding
+        balanceCard.setMaximumSize(new Dimension(350, 70));
+        balanceCard.setPreferredSize(new Dimension(350, 70));
         balanceCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         balanceCard.setLayout(new BorderLayout());
 
@@ -165,12 +202,32 @@ public class MainFrame extends JFrame {
         mainButtonsPanel.add(btnHistory);
 
         // Placeholder area với modern card design
-        JPanel placeholderPanel = new JPanel();
-        placeholderPanel.setOpaque(true);
-        placeholderPanel.setBackground(Color.WHITE);
-        placeholderPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(224, 224, 224), 1),
-                BorderFactory.createEmptyBorder(40, 20, 40, 20)));
+        JPanel placeholderPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 20; // Rounded corner radius
+
+                // White background with rounded corners
+                g2d.setColor(Color.WHITE);
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Subtle shadow
+                g2d.setColor(new Color(0, 0, 0, 20));
+                g2d.fillRoundRect(2, 2, w - 4, h - 4, arc, arc);
+
+                // Border
+                g2d.setColor(new Color(224, 224, 224));
+                g2d.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
+            }
+        };
+        placeholderPanel.setOpaque(false); // Để paintComponent hoạt động
+        placeholderPanel.setBorder(BorderFactory.createEmptyBorder(40, 20, 40, 20));
         placeholderPanel.setLayout(new BorderLayout());
 
         JLabel placeholderLabel = new JLabel(
@@ -186,8 +243,30 @@ public class MainFrame extends JFrame {
         centerPanel.add(placeholderPanel, BorderLayout.CENTER);
 
         buttonPanel.add(centerPanel, BorderLayout.CENTER); // ===== FOOTER với modern design =====
-        JPanel footerPanel = new JPanel();
-        footerPanel.setBackground(new Color(250, 250, 250));
+        JPanel footerPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 15; // Rounded corner radius
+
+                // Subtle gradient background
+                Color color1 = new Color(250, 250, 250);
+                Color color2 = new Color(240, 240, 240);
+                GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                g2d.setPaint(gp);
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Subtle border
+                g2d.setColor(new Color(200, 200, 200, 50));
+                g2d.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
+            }
+        };
+        footerPanel.setOpaque(false); // Để paintComponent hoạt động
         footerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         footerPanel.setLayout(new BorderLayout());
 
@@ -208,30 +287,61 @@ public class MainFrame extends JFrame {
 
     // Phương thức tạo nút modern với shadow và hover effect
     private JButton createModernButton(String icon, String text, Color bgColor, Color textColor) {
-        JButton button = new JButton("<html><center><div style='margin-top: 8px;'><span style='font-size: 20px;'>"
+        JButton button = new JButton() {
+            private boolean hovered = false;
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int arc = 20; // Rounded corner radius
+
+                // Shadow effect
+                g2d.setColor(new Color(0, 0, 0, hovered ? 60 : 40));
+                g2d.fillRoundRect(3, 3, w - 6, h - 6, arc, arc);
+
+                // Button background
+                Color buttonColor = hovered ? bgColor.brighter() : bgColor;
+                g2d.setColor(buttonColor);
+                g2d.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Border
+                g2d.setColor(new Color(255, 255, 255, 100));
+                g2d.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
+
+                super.paintComponent(g);
+            }
+
+            @Override
+            public void setBackground(Color bg) {
+                // Override to prevent default background setting
+            }
+        };
+
+        button.setText("<html><center><div style='margin-top: 8px;'><span style='font-size: 20px;'>"
                 + icon
                 + "</span></div><div style='margin-top: 8px; margin-bottom: 8px;'><span style='font-size: 11px;'>"
                 + text + "</span></div></center></html>");
         button.setPreferredSize(new Dimension(140, 80));
-        button.setBackground(bgColor);
         button.setForeground(textColor);
         button.setFont(new Font("Segoe UI", Font.BOLD, 11));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15))); // Giảm padding trên/dưới
+        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        button.setContentAreaFilled(false); // Disable default painting
+        button.setOpaque(false); // Make transparent for custom painting
 
         // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
-            Color originalColor = bgColor;
-
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor.brighter());
+                ((JButton) evt.getSource()).repaint();
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(originalColor);
+                ((JButton) evt.getSource()).repaint();
             }
         });
 
@@ -282,7 +392,7 @@ public class MainFrame extends JFrame {
         sidePanel = new JPanel();
         sidePanel.setBackground(Color.WHITE);
         sidePanel.setLayout(new BorderLayout());
-        sidePanel.setBounds(0, 0, panelWidth, getHeight());
+        sidePanel.setBounds(-panelWidth, 0, panelWidth, getHeight()); // Start off-screen
         sidePanel.setOpaque(true); // Đảm bảo hoàn toàn opaque
 
         // Thêm mouse listener để chặn hoàn toàn tương tác xuyên qua
@@ -394,25 +504,47 @@ public class MainFrame extends JFrame {
         menuButton.setText("✕");
         menuButton.revalidate(); // Force UI update
         menuButton.repaint(); // Force repaint
-        sideMenuOpen = true; // Animation slide in (đơn giản)
-        sidePanel.revalidate();
-        sidePanel.repaint();
+        sideMenuOpen = true; // Animation slide in
+        sideMenuTimer = new Timer(10, e -> {
+            int currentX = sidePanel.getX();
+            int targetX = 0;
+            int step = 10; // Slide speed
+            if (currentX < targetX) {
+                sidePanel.setLocation(Math.min(currentX + step, targetX), 0);
+            } else {
+                ((Timer) e.getSource()).stop();
+            }
+        });
+        sideMenuTimer.start();
     }
 
     private void closeSideMenu() {
         if (sidePanel != null) {
-            getLayeredPane().remove(sidePanel);
-            sidePanel = null;
+            // Animation slide out
+            sideMenuTimer = new Timer(10, e -> {
+                int currentX = sidePanel.getX();
+                int targetX = -sidePanel.getWidth();
+                int step = 10; // Slide speed
+                if (currentX > targetX) {
+                    sidePanel.setLocation(Math.max(currentX - step, targetX), 0);
+                } else {
+                    ((Timer) e.getSource()).stop();
+                    // Remove panels after animation
+                    getLayeredPane().remove(sidePanel);
+                    sidePanel = null;
+                    if (overlayPanel != null) {
+                        getLayeredPane().remove(overlayPanel);
+                        overlayPanel = null;
+                    }
+                    menuButton.setText("⚙"); // Đổi lại thành bánh răng
+                    menuButton.revalidate(); // Force UI update
+                    menuButton.repaint(); // Force repaint
+                    sideMenuOpen = false;
+                    repaint();
+                }
+            });
+            sideMenuTimer.start();
         }
-        if (overlayPanel != null) {
-            getLayeredPane().remove(overlayPanel);
-            overlayPanel = null;
-        }
-        menuButton.setText("⚙"); // Đổi lại thành bánh răng
-        menuButton.revalidate(); // Force UI update
-        menuButton.repaint(); // Force repaint
-        sideMenuOpen = false;
-        repaint();
     }
 
     // Tạo nút dạng hình chữ nhật cho side panel
